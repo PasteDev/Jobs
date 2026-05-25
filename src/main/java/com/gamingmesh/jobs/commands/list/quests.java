@@ -116,19 +116,14 @@ public class quests implements Cmd {
 
                 RawMessage rm = new RawMessage();
 
-                String hoverMsg = Jobs.getLanguage().getMessage("command.quests.output.hover");
+                String hoverMsg = Jobs.getLanguage().getMessage(
+                    "command.quests.output.hover",
+                    jobProg.getJob(),
+                    "[time]", CMITimeManager.to24hourShort(q.getValidUntil() - System.currentTimeMillis()),
+                    "[desc]", sanitizeQuestDescription(quest.getDescription())
+                );
                 List<String> hoverList = new ArrayList<>();
-
-                for (String current : hoverMsg.split("\n")) {
-                    current = Language.updateJob(current, jobProg.getJob())
-                        .replace("[time]", CMITimeManager.to24hourShort(q.getValidUntil() - System.currentTimeMillis()));
-
-                    if (current.contains("[desc]")) {
-                        hoverList.addAll(quest.getDescription());
-                    } else {
-                        hoverList.add(current);
-                    }
-                }
+                hoverList.add(hoverMsg);
 
                 for (java.util.Map<String, QuestObjective> oneAction : quest.getObjectives().values()) {
                     for (Entry<String, QuestObjective> oneObjective : oneAction.entrySet()) {
@@ -188,19 +183,14 @@ public class quests implements Cmd {
 
                 Quest quest = q.getQuest();
 
-                String hoverMsg = Jobs.getLanguage().getMessage("command.quests.output.hover");
+                String hoverMsg = Jobs.getLanguage().getMessage(
+                    "command.quests.output.hover",
+                    jobProg.getJob(),
+                    "[time]", CMITimeManager.to24hourShort(q.getValidUntil() - System.currentTimeMillis()),
+                    "[desc]", sanitizeQuestDescription(quest.getDescription())
+                );
                 List<String> hoverList = new ArrayList<>();
-
-                for (String current : hoverMsg.split("\n")) {
-                    current = Language.updateJob(current, jobProg.getJob())
-                        .replace("[time]", CMITimeManager.to24hourShort(q.getValidUntil() - System.currentTimeMillis()));
-
-                    if (current.contains("[desc]")) {
-                        hoverList.addAll(quest.getDescription());
-                    } else {
-                        hoverList.add(current);
-                    }
-                }
+                hoverList.add(hoverMsg);
 
                 for (java.util.Map<String, QuestObjective> oneAction : quest.getObjectives().values()) {
                     for (Entry<String, QuestObjective> oneObjective : oneAction.entrySet()) {
@@ -253,5 +243,17 @@ public class quests implements Cmd {
         gui.fillEmptyButtons();
         gui.open();
 
+    }
+
+    private static String sanitizeQuestDescription(List<String> lines) {
+        String prefix = "<b><white>QSMP</white></b> <dark_gray>»</dark_gray>";
+        List<String> clean = new ArrayList<>();
+        for (String line : lines) {
+            if (line == null) {
+                continue;
+            }
+            clean.add(line.replace(prefix + " ", "").replace(prefix, ""));
+        }
+        return String.join("\n", clean);
     }
 }

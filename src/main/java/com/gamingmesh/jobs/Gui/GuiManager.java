@@ -155,7 +155,7 @@ public class GuiManager {
 				openJobsBrowseGUI(player, page, jobsList);
 			}
 		};
-		gui.setTitle(Jobs.getLanguage().getMessage("command.info.gui.pickjob"));
+		gui.setTitle(Jobs.getLanguage().getMessage(player, "command.info.gui.pickjob"));
 		gui.setInvSize(guiSize);
 
 		JobsPlayer jPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
@@ -182,46 +182,46 @@ public class GuiManager {
 
 			for (JobProgression onePJob : jPlayer.getJobProgression()) {
 				if (onePJob.getJob().getName().equalsIgnoreCase(job.getName())) {
-					lore.add(Jobs.getLanguage().getMessage("command.info.gui.working"));
+					lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.working"));
 					break;
 				}
 			}
 
 			int maxlevel = job.getMaxLevel(jPlayer);
 			if (maxlevel > 0)
-				lore.add(Jobs.getLanguage().getMessage("command.info.gui.max") + maxlevel);
+				lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.max") + maxlevel);
 
 			if (Jobs.getGCManager().ShowTotalWorkers)
-				lore.add(Jobs.getLanguage().getMessage("command.browse.output.totalWorkers", "[amount]", job.getTotalPlayers()));
+				lore.add(Jobs.getLanguage().getMessage(player, "command.browse.output.totalWorkers", "[amount]", job.getTotalPlayers()));
 
 			if (Jobs.getGCManager().useDynamicPayment && Jobs.getGCManager().ShowPenaltyBonus) {
 				double bonus = job.getBonus();
 
 				if (bonus < 0)
-					lore.add(Jobs.getLanguage().getMessage("command.browse.output.penalty", "[amount]", (int) (bonus * 100) * -1));
+					lore.add(Jobs.getLanguage().getMessage(player, "command.browse.output.penalty", "[amount]", (int) (bonus * 100) * -1));
 				else
-					lore.add(Jobs.getLanguage().getMessage("command.browse.output.bonus", "[amount]", (int) (bonus * 100)));
+					lore.add(Jobs.getLanguage().getMessage(player, "command.browse.output.bonus", "[amount]", (int) (bonus * 100)));
 			}
 
 			if (job.getDescription().isEmpty()) {
-				lore.addAll(job.getFullDescription());
+				lore.addAll(Jobs.getInstance().getPlaceholderAPIManager().updatePlaceHolders(player, job.getFullDescription()));
 			} else
-				lore.addAll(Arrays.asList(job.getDescription().split("/n|\\n")));
+				lore.addAll(Jobs.getInstance().getPlaceholderAPIManager().updatePlaceHolders(player, Arrays.asList(job.getDescription().split("/n|\\n"))));
 
 			if (job.getMaxSlots() != null) {
 				int usedSlots = Jobs.getUsedSlots(job);
-				lore.add(Jobs.getLanguage().getMessage("command.info.gui.leftSlots") + ((job.getMaxSlots() - usedSlots) > 0 ? (job.getMaxSlots() - usedSlots) : 0));
+				lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.leftSlots") + ((job.getMaxSlots() - usedSlots) > 0 ? (job.getMaxSlots() - usedSlots) : 0));
 			}
 
 			if (Jobs.getGCManager().ShowActionNames) {
 				lore.add("");
-				lore.add(Jobs.getLanguage().getMessage("command.info.gui.actions"));
+				lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.actions"));
 
 				for (ActionType actionType : ActionType.values()) {
 					List<JobInfo> info = job.getJobInfo(actionType);
 
 					if (info != null && !info.isEmpty()) {
-						lore.add(Jobs.getLanguage().getMessage("command.info.output." + actionType.getName().toLowerCase() + ".info"));
+						lore.add(Jobs.getLanguage().getMessage(player, "command.info.output." + actionType.getName().toLowerCase() + ".info"));
 					}
 				}
 			}
@@ -229,17 +229,17 @@ public class GuiManager {
 			lore.add("");
 
 			if (Jobs.getGCManager().JobsGUISwitcheButtons && !jPlayer.isInJob(job) || !Jobs.getGCManager().JobsGUISwitcheButtons)
-				lore.add(Jobs.getLanguage().getMessage("command.info.gui.leftClick"));
+				lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.leftClick"));
 
 			if (jPlayer.isInJob(job)) {
 				if (Version.isCurrentEqualOrHigher(Version.v1_18_R1))
-					lore.add(Jobs.getLanguage().getMessage("command.info.gui.qClick"));
+					lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.qClick"));
 				else
-					lore.add(Jobs.getLanguage().getMessage("command.info.gui.middleClick"));
+					lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.middleClick"));
 			}
 
 			if (!Jobs.getGCManager().JobsGUISwitcheButtons && !jPlayer.isInJob(job) || Jobs.getGCManager().JobsGUISwitcheButtons)
-				lore.add(Jobs.getLanguage().getMessage("command.info.gui.rightClick"));
+				lore.add(Jobs.getLanguage().getMessage(player, "command.info.gui.rightClick"));
 
 			ItemStack guiItem = job.getGuiItem().clone();
 
@@ -254,7 +254,7 @@ public class GuiManager {
 							if (!Jobs.getGCManager().DisableJoiningJobThroughGui) {
 								Jobs.getCommandManager().onCommand(player, null, "jobs", new String[] { "join", job.getName() });
 							} else {
-								player.sendMessage(Jobs.getLanguage().getMessage("command.info.gui.cantJoin"));
+								player.sendMessage(Jobs.getLanguage().getMessage(player, "command.info.gui.cantJoin"));
 							}
 							openJobsBrowseGUI(player);
 						} else {
@@ -274,7 +274,7 @@ public class GuiManager {
 							if (!Jobs.getGCManager().DisableJoiningJobThroughGui) {
 								Jobs.getCommandManager().onCommand(player, null, "jobs", new String[] { "join", job.getName() });
 							} else {
-								player.sendMessage(Jobs.getLanguage().getMessage("command.info.gui.cantJoin"));
+								player.sendMessage(Jobs.getLanguage().getMessage(player, "command.info.gui.cantJoin"));
 							}
 							openJobsBrowseGUI(player);
 						}
@@ -285,7 +285,7 @@ public class GuiManager {
 				}
 			};
 
-			button.setName(Jobs.getLanguage().getMessage("command.info.help.jobName", job));
+			button.setName(Jobs.getLanguage().getMessage(player, "command.info.help.jobName", job));
 			button.clearLore();
 			button.addLore(lore);
 			if (Jobs.getGCManager().hideItemAttributes) {
@@ -304,7 +304,7 @@ public class GuiManager {
 			ItemStack next = Jobs.getGCManager().guiInfoButton;
 			ItemMeta meta = next.getItemMeta();
 
-			List<String> l = Jobs.getLanguage().getMessageList("command.info.gui.infoLore");
+			List<String> l = Jobs.getLanguage().getMessageList(player, "command.info.gui.infoLore");
 
 			if (!l.isEmpty())
 				meta.setDisplayName(l.remove(0));
@@ -411,7 +411,7 @@ public class GuiManager {
 				break;
 
 			List<String> lore = new ArrayList<>();
-			lore.add(Jobs.getLanguage().getMessage("command.info.output." + action.getType().getName().toLowerCase() + ".info"));
+			lore.add(Jobs.getLanguage().getMessage(player, "command.info.output." + action.getType().getName().toLowerCase() + ".info"));
 			ItemStack guiItem = action.getType().getGuiItems().isEmpty() ? null : action.getType().getGuiItems().get(i % action.getType().getGuiItems().size());
 			i++;
 
@@ -458,22 +458,22 @@ public class GuiManager {
 				String val = "";
 
 				if (income != 0.0)
-					val += Jobs.getLanguage().getMessage("command.info.help.money", "%money%", incomeColor + CurrencyType.MONEY.format(income));
+					val += Jobs.getLanguage().getMessage(player, "command.info.help.money", "%money%", incomeColor + CurrencyType.MONEY.format(income));
 
 				if (points != 0.0)
-					val += Jobs.getLanguage().getMessage("command.info.help.points", "%points%", pointsColor + CurrencyType.POINTS.format(points));
+					val += Jobs.getLanguage().getMessage(player, "command.info.help.points", "%points%", pointsColor + CurrencyType.POINTS.format(points));
 
 				if (xp != 0.0)
-					val += Jobs.getLanguage().getMessage("command.info.help.exp", "%exp%", xpColor + CurrencyType.EXP.format(xp));
+					val += Jobs.getLanguage().getMessage(player, "command.info.help.exp", "%exp%", xpColor + CurrencyType.EXP.format(xp));
 
-				lore.add(Jobs.getLanguage().getMessage("command.info.help.material", "%material%", itemName) + val);
+				lore.add(Jobs.getLanguage().getMessage(player, "command.info.help.material", "%material%", itemName) + val);
 			}
 
 			if (guiItem == null)
 				guiItem = job.getGuiItem().clone();
 
 			ItemMeta meta = guiItem.getItemMeta();
-			meta.setDisplayName(Jobs.getLanguage().getMessage("command.info.help.jobName", job));
+			meta.setDisplayName(Jobs.getLanguage().getMessage(player, "command.info.help.jobName", job));
 			meta.setLore(lore);
 			guiItem.setItemMeta(meta);
 			items.add(guiItem.clone());
@@ -482,7 +482,7 @@ public class GuiManager {
 		int guiSize = rows * 9;
 
 		CMIGui gui = new CMIGui(player);
-		gui.setTitle(Language.updateJob(Jobs.getLanguage().getMessage("command.info.gui.jobinfo"), job));
+		gui.setTitle(Language.updateJob(Jobs.getLanguage().getMessage(player, "command.info.gui.jobinfo"), job));
 		gui.setInvSize(guiSize);
 
 		for (ItemStack item : items) {
@@ -508,7 +508,7 @@ public class GuiManager {
 						leaveConfirmation(player, job);
 					}
 				};
-				button.setName(Jobs.getLanguage().getMessage("general.info.leave"));
+				button.setName(Jobs.getLanguage().getMessage(player, "general.info.leave"));
 
 				gui.addButton(button);
 			} else if (Jobs.getPlayerManager().getJobsLimit(jPlayer, (short) jPlayer.getJobProgression().size())) {
@@ -537,7 +537,7 @@ public class GuiManager {
 	private void leaveConfirmation(Player player, Job job) {
 
 		CMIGui gui = new CMIGui(player);
-		gui.setTitle(Language.updateJob(Jobs.getLanguage().getMessage("command.info.gui.jobinfo"), job));
+		gui.setTitle(Language.updateJob(Jobs.getLanguage().getMessage(player, "command.info.gui.jobinfo"), job));
 		gui.setInvSize(getGUIRows(player.getUniqueId()) * 9);
 
 		int rows = getGUIRows(player.getUniqueId());
@@ -570,7 +570,7 @@ public class GuiManager {
 				openJobsGUI(player, job);
 			}
 		};
-		button.setName(Jobs.getLanguage().getMessage("general.info.join"));
+		button.setName(Jobs.getLanguage().getMessage(player, "general.info.join"));
 
 		return button;
 	}
@@ -584,7 +584,7 @@ public class GuiManager {
 				openJobsGUI(player, job);
 			}
 		};
-		button.setName(Jobs.getLanguage().getMessage("general.info.leave"));
+		button.setName(Jobs.getLanguage().getMessage(player, "general.info.leave"));
 
 		return button;
 	}

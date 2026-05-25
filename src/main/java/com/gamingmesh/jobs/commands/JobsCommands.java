@@ -449,6 +449,7 @@ public class JobsCommands implements CommandExecutor {
             "%jobxp%", CurrencyType.EXP.format(jobProg.getExperience()),
             "%jobmaxxp%", jobProg.getMaxExperience(),
             "%titlename%", title == null ? "Unknown" : title.getName());
+        message = stripStatsPrefix(message);
         return " " + (isMaxLevelReached ? "" : progressBar ? jobProgressMessage(jobProg.getMaxExperience(), jobProg.getExperience()) : "") + " " + message;
     }
 
@@ -467,8 +468,8 @@ public class JobsCommands implements CommandExecutor {
         if (bars <= 0)
             return "";
 
-        String full = Jobs.getLanguage().getMessage("command.stats.barFull");
-        String empty = Jobs.getLanguage().getMessage("command.stats.barEmpty");
+        String full = normalizeBarSegment(Jobs.getLanguage().getMessage("command.stats.barFull"), "&2▏");
+        String empty = normalizeBarSegment(Jobs.getLanguage().getMessage("command.stats.barEmpty"), "&7▏");
 
         StringBuilder message = new StringBuilder();
         int percentage = (int) ((current * bars) / max);
@@ -484,6 +485,20 @@ public class JobsCommands implements CommandExecutor {
         }
 
         return message.toString();
+    }
+
+    private String normalizeBarSegment(String value, String fallback) {
+        if (value == null || value.isEmpty()) {
+            return CMIChatColor.translate(fallback);
+        }
+        String trimmed = value.trim();
+        if (trimmed.startsWith("<lang:") && trimmed.endsWith(">")) {
+            return CMIChatColor.translate(fallback);
+        }
+        if (trimmed.contains(".") && !trimmed.contains(" ") && trimmed.toLowerCase().contains("jobs.locale.")) {
+            return CMIChatColor.translate(fallback);
+        }
+        return value;
     }
 
     /**
@@ -502,6 +517,15 @@ public class JobsCommands implements CommandExecutor {
             jobProg.getJob(),
             "%jobxp%", Math.round(exp * 100.0) / 100.0,
             "%jobmaxxp%", maxExperience);
+        message = stripStatsPrefix(message);
         return " " + jobProgressMessage(maxExperience, exp) + " " + message;
+    }
+
+    private String stripStatsPrefix(String value) {
+        if (value == null || value.isEmpty()) {
+            return value;
+        }
+        String prefix = "<b><white>QSMP</white></b> <dark_gray>»</dark_gray>";
+        return value.replace(prefix + " ", "").replace(prefix, "");
     }
 }

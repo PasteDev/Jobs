@@ -21,11 +21,14 @@ package com.gamingmesh.jobs.i18n;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.config.YmlMaker;
@@ -39,6 +42,7 @@ public class Language {
     public FileConfiguration enlocale, customlocale;
 
     private static final Pattern NEW_LINE_PATTERN = Pattern.compile("([ ]?[\\/][n][$|\\s])");
+    private static final Pattern LANG_TAG_PATTERN = Pattern.compile("^<lang:([^>]+)>$");
 
     private static final Pattern JOB_NAME_PATTERN = Pattern.compile("(?i)[\\[%]jobname[\\]%]");
     private static final Pattern JOB_DISPLAY_NAME_PATTERN = Pattern.compile("(?i)[\\[%]jobdisplayname[\\]%]");
@@ -121,24 +125,20 @@ public class Language {
             }
         }
 
-        if (variables == null || variables.length == 0)
-            return msg;
-
-        for (int i = 0; i < variables.length; i++) {
-
-            if (variables[i] instanceof Job) {
-                msg = updateJob(msg, (Job) variables[i]);
-                continue;
-            }
-
-            if (variables.length < i + 2)
-                break;
-
-            msg = msg.replace(String.valueOf(variables[i]), String.valueOf(variables[i + 1]));
-            i++;
+        if (isLangTag(msg)) {
+            return appendLangArgs(msg, variables);
         }
+        return applyVariables(msg, variables);
+    }
 
-        return msg;
+    public String getMessage(Player player, String key, Object... variables) {
+        String template = getMessage(key);
+        if (player == null || template == null || template.isEmpty()) {
+            return applyVariables(template, variables);
+        }
+        String msg = isLangTag(template) ? appendLangArgs(template, variables) : applyVariables(template, variables);
+        msg = Jobs.getInstance().getPlaceholderAPIManager().updatePlaceHolders(player, msg);
+        return isLangTag(template) ? msg : applyVariables(msg, variables);
     }
 
     /**
@@ -160,14 +160,127 @@ public class Language {
         if (variables != null && variables.length > 0)
             for (int i = 0; i < ls.size(); i++) {
                 String msg = ls.get(i);
-                for (int y = 0; y < variables.length; y += 2) {
-                    msg = msg.replace(String.valueOf(variables[y]), String.valueOf(variables[y + 1]));
-                }
-
+                msg = isLangTag(msg) ? appendLangArgs(msg, variables) : applyVariables(msg, variables);
                 ls.set(i, CMIChatColor.translate(filterNewLine(msg)));
             }
 
         return ls;
+    }
+
+    public List<String> getMessageList(Player player, String key, Object... variables) {
+        List<String> ls = getMessageList(key);
+        if (player == null || ls == null || ls.isEmpty()) {
+            for (int i = 0; i < ls.size(); i++) {
+                ls.set(i, applyVariables(ls.get(i), variables));
+            }
+            return ls;
+        }
+        for (int i = 0; i < ls.size(); i++) {
+            String line = ls.get(i);
+            boolean langTag = isLangTag(line);
+            line = langTag ? appendLangArgs(line, variables) : applyVariables(line, variables);
+            line = Jobs.getInstance().getPlaceholderAPIManager().updatePlaceHolders(player, line);
+            ls.set(i, langTag ? line : applyVariables(line, variables));
+        }
+        return ls;
+    }
+
+    private String applyVariables(String msg, Object... variables) {
+        if (msg == null || msg.isEmpty() || variables == null || variables.length == 0)
+            return msg;
+
+        for (int i = 0; i < variables.length; i++) {
+            if (variables[i] instanceof Job) {
+                msg = updateJob(msg, (Job) variables[i]);
+                continue;
+            }
+
+            if (variables.length <= i + 1)
+                break;
+
+            String rawToken = String.valueOf(variables[i]);
+            String replacement = String.valueOf(variables[i + 1]);
+            msg = msg.replace(rawToken, replacement);
+            String normalizedToken = normalizeVariableToken(rawToken);
+            if (normalizedToken != null && !normalizedToken.isEmpty()) {
+                msg = replaceTokenIgnoreCase(msg, "%", "%", normalizedToken, replacement);
+                msg = replaceTokenIgnoreCase(msg, "[", "]", normalizedToken, replacement);
+            }
+            i++;
+        }
+        return msg;
+    }
+
+    private String replaceTokenIgnoreCase(String input, String prefix, String suffix, String key, String replacement) {
+        String pattern = "(?i)" + Pattern.quote(prefix) + Pattern.quote(key) + Pattern.quote(suffix);
+        return input.replaceAll(pattern, Matcher.quoteReplacement(replacement));
+    }
+
+    private boolean isLangTag(String msg) {
+        return msg != null && LANG_TAG_PATTERN.matcher(msg.trim()).matches();
+    }
+
+    private String appendLangArgs(String msg, Object... variables) {
+        if (msg == null || msg.isEmpty() || variables == null || variables.length == 0) {
+            return msg;
+        }
+
+        Matcher matcher = LANG_TAG_PATTERN.matcher(msg.trim());
+        if (!matcher.matches()) {
+            return msg;
+        }
+
+        StringBuilder suffix = new StringBuilder();
+        for (int i = 0; i < variables.length; i++) {
+            Object raw = variables[i];
+            if (raw instanceof Job) {
+                Job job = (Job) raw;
+                appendLangArg(suffix, "jobname", job.getName());
+                appendLangArg(suffix, "jobdisplayname", job.getDisplayName());
+                appendLangArg(suffix, "jobfullname", job.getJobFullName());
+                continue;
+            }
+
+            if (variables.length <= i + 1) {
+                break;
+            }
+
+            String token = normalizeVariableToken(raw);
+            if (token != null && !token.isEmpty()) {
+                appendLangArg(suffix, token, String.valueOf(variables[i + 1]));
+            }
+            i++;
+        }
+
+        if (suffix.length() == 0) {
+            return msg;
+        }
+
+        return "<lang:" + matcher.group(1) + suffix + ">";
+    }
+
+    private String normalizeVariableToken(Object tokenObj) {
+        if (tokenObj == null) {
+            return null;
+        }
+        String token = String.valueOf(tokenObj).trim();
+        if (token.isEmpty()) {
+            return null;
+        }
+        if (token.startsWith("%") && token.endsWith("%") && token.length() > 2) {
+            token = token.substring(1, token.length() - 1);
+        } else if (token.startsWith("[") && token.endsWith("]") && token.length() > 2) {
+            token = token.substring(1, token.length() - 1);
+        }
+        token = token.replaceAll("[^a-zA-Z0-9_\\-]", "");
+        return token.isEmpty() ? null : token;
+    }
+
+    private void appendLangArg(StringBuilder suffix, String key, String value) {
+        if (value == null) {
+            return;
+        }
+        suffix.append("|").append(key).append("=").append(URLEncoder.encode(value, StandardCharsets.UTF_8));
     }
 
     public String filterNewLine(String msg) {
