@@ -1533,11 +1533,30 @@ public abstract class JobsDAO {
      * @param player - player that wishes to join the job
      * @param job - job that the player wishes to join
      */
-    public synchronized void joinJob(JobsPlayer jPlayer, JobProgression job) {
+    public void joinJob(JobsPlayer jPlayer, JobProgression job) {
         CompletableFuture.runAsync(() -> {
             JobsConnection conn = getConnection();
             if (conn == null)
                 return;
+
+            PreparedStatement check = null;
+            ResultSet res = null;
+            try {
+                check = conn.prepareStatement("SELECT 1 FROM `" + getJobsTableName() + "` WHERE `" + JobsTableFields.userid.getCollumn()
+                    + "` = ? AND `" + JobsTableFields.jobid.getCollumn() + "` = ? LIMIT 1;");
+                check.setInt(1, jPlayer.getUserId());
+                check.setInt(2, job.getJob().getId());
+                res = check.executeQuery();
+                if (res.next()) {
+                    return;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                close(res);
+                close(check);
+            }
+
             PreparedStatement prest = null;
             try {
                 prest = conn.prepareStatement("INSERT INTO `" + getJobsTableName() + "` (`" + JobsTableFields.userid.getCollumn() + "`, `" + JobsTableFields.jobid.getCollumn()
@@ -1926,11 +1945,12 @@ public abstract class JobsDAO {
             if (!plugin.isEnabled())
                 return null;
 
-            // add the job
             Job job = Jobs.getJob(jobdata.getJobName());
-            if (job != null)
+            if (job != null) {
                 jPlayer.progression.add(new JobProgression(job, jPlayer, jobdata.getLevel(), jobdata.getExperience()));
+            }
         }
+        jPlayer.deduplicateProgressions();
         jPlayer.reloadMaxExperience();
         jPlayer.reloadLimits();
         jPlayer.setUserId(Jobs.getPlayerManager().getPlayerId(jPlayer.getUniqueId()));

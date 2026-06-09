@@ -822,10 +822,8 @@ public final class Jobs extends JavaPlugin {
 			complement = new Complement1();
 
 			if (HookVault.isVaultEnable()) {
-				// register economy
-				CMIScheduler.runTask(Jobs.getInstance(), () -> new HookEconomyTask(net.milkbowl.vault.economy.Economy.class));
+				HookEconomyTask.schedule();
 
-				// register permission from vault
 				CMIScheduler.runTask(Jobs.getInstance(), () -> new HookPermissionTask(Permission.class));
 			}
 

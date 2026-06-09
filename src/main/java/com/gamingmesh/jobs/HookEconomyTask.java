@@ -1,34 +1,46 @@
-/**
- * Jobs Plugin for Bukkit
- * Copyright (C) 2011 Zak Ford <zak.j.ford@gmail.com>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package com.gamingmesh.jobs;
 
 import com.gamingmesh.jobs.economy.VaultEconomy;
+import net.Zrips.CMILib.Messages.CMIMessages;
+import net.Zrips.CMILib.Version.Schedulers.CMIScheduler;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
-public class HookEconomyTask extends HookVault<Economy> {
+public final class HookEconomyTask {
 
-    public HookEconomyTask(Class<Economy> providerClass) {
-        super(providerClass);
+    private static final int MAX_ATTEMPTS = 40;
+
+    private HookEconomyTask() {
     }
 
-    @Override
-    void runIfProviderIsFound() {
-        Jobs.setEconomy(new VaultEconomy(provider.getProvider()));
+    public static void schedule() {
+        if (!HookVault.isVaultEnable()) {
+            return;
+        }
+        CMIScheduler.runTask(Jobs.getInstance(), () -> tryHook(0));
+    }
+
+    private static void tryHook(int attempt) {
+        RegisteredServiceProvider<Economy> provider = Jobs.getInstance()
+                .getServer()
+                .getServicesManager()
+                .getRegistration(Economy.class);
+
+        if (provider != null) {
+            Jobs.setEconomy(new VaultEconomy(provider.getProvider()));
+            CMIMessages.consoleMessage("&e[" + Jobs.getInstance().getName() + "] Successfully linked with Vault economy. ("
+                    + provider.getPlugin().getName() + ")");
+            return;
+        }
+
+        if (attempt + 1 < MAX_ATTEMPTS) {
+            CMIScheduler.runTaskLater(Jobs.getInstance(), () -> tryHook(attempt + 1), 1L);
+            return;
+        }
+
+        Jobs.getPluginLogger().severe("==================== " + Jobs.getInstance().getDescription().getName() + " ====================");
+        Jobs.getPluginLogger().severe("Vault detected but Economy plugin still missing!");
+        Jobs.getPluginLogger().severe("Please install Vault supporting Economy plugin!");
+        Jobs.getPluginLogger().severe("==============================================");
     }
 }

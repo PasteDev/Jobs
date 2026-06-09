@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -473,8 +474,10 @@ public class JobsPlayer {
     /**
      * @return an unmodifiable list of job progressions
      */
-    public synchronized List<JobProgression> getJobProgression() {
-        return Collections.unmodifiableList(progression);
+    public List<JobProgression> getJobProgression() {
+        synchronized (progression) {
+            return Collections.unmodifiableList(new ArrayList<>(progression));
+        }
     }
 
     public int getJobCount() {
@@ -579,8 +582,15 @@ public class JobsPlayer {
      * @param job where to join
      */
     public boolean joinJob(Job job) {
-//	synchronized (saveLock) {
-        if (!isInJob(job)) {
+        if (job == null) {
+            return false;
+        }
+
+        synchronized (progression) {
+            if (containsJobProgression(job)) {
+                return false;
+            }
+
             int level = 1;
             double exp = 0;
 
@@ -591,17 +601,13 @@ public class JobsPlayer {
                 Jobs.getJobsDAO().deleteArchive(this, job);
             }
 
-            synchronized (progression) {
-                progression.add(new JobProgression(job, this, level, exp));
-            }
+            progression.add(new JobProgression(job, this, level, exp));
             reloadMaxExperience();
             reloadLimits();
             reloadHonorific();
             Jobs.getPermissionHandler().recalculatePermissions(this);
             return true;
         }
-        return false;
-//	}
     }
 
     public int getLevelAfterRejoin(JobProgression jp) {
@@ -767,7 +773,7 @@ public class JobsPlayer {
      */
     public boolean transferJob(Job oldjob, Job newjob) {
         synchronized (progression) {
-            if (isInJob(newjob))
+            if (containsJobProgression(newjob))
                 return false;
 
             for (JobProgression prog : progression) {
@@ -812,14 +818,55 @@ public class JobsPlayer {
         return maxLevel;
     }
 
-    /**
-     * Checks if the player is in the given job.
-     * 
-     * @param job {@link Job}
-     * @return true if this player is in the given job, otherwise false
-     */
     public boolean isInJob(Job job) {
-        return getJobProgression(job) != null;
+        synchronized (progression) {
+            return containsJobProgression(job);
+        }
+    }
+
+    private boolean containsJobProgression(Job job) {
+        if (job == null) {
+            return false;
+        }
+        for (JobProgression prog : progression) {
+            if (prog.getJob().isSame(job)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void deduplicateProgressions() {
+        synchronized (progression) {
+            if (progression.size() < 2) {
+                return;
+            }
+
+            LinkedHashMap<Integer, JobProgression> unique = new LinkedHashMap<>();
+            for (JobProgression prog : progression) {
+                Job progJob = prog.getJob();
+                if (progJob == null) {
+                    continue;
+                }
+
+                JobProgression existing = unique.get(progJob.getId());
+                if (existing == null || prog.getLevel() > existing.getLevel()
+                        || (prog.getLevel() == existing.getLevel() && prog.getExperience() > existing.getExperience())) {
+                    unique.put(progJob.getId(), prog);
+                }
+            }
+
+            if (unique.size() == progression.size()) {
+                return;
+            }
+
+            progression.clear();
+            progression.addAll(unique.values());
+            reloadMaxExperience();
+            reloadLimits();
+            reloadHonorific();
+            Jobs.getPermissionHandler().recalculatePermissions(this);
+        }
     }
 
     /**

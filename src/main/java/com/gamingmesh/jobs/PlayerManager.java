@@ -292,6 +292,7 @@ public class PlayerManager {
 
     private void finalizeJoinPlayer(JobsPlayer jPlayer) {
 
+        jPlayer.deduplicateProgressions();
         addPlayer(jPlayer);
         autoJoinJobs(jPlayer.getPlayer());
         jPlayer.onConnect();
