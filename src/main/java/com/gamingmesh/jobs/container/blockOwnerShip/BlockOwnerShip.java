@@ -30,6 +30,7 @@ import net.Zrips.CMILib.Items.CMIMaterial;
 import net.Zrips.CMILib.Messages.CMIMessages;
 import net.Zrips.CMILib.Version.Schedulers.CMIScheduler;
 import net.Zrips.CMILib.Version.Schedulers.CMITask;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class BlockOwnerShip {
 
@@ -130,7 +131,7 @@ public class BlockOwnerShip {
 				Player owningPlayer = Bukkit.getPlayer(ownerUUID);
 
 				if (owningPlayer != null && owningPlayer.isOnline()) {
-					owningPlayer.sendMessage(Jobs.getLanguage().getMessage("command.clearownership.output.lost",
+					Language.deliver(owningPlayer, Jobs.getLanguage().getMessage("command.clearownership.output.lost",
 							"[type]", CMIMaterial.get(type.toString()).getName(), "[location]",
 							CMILocation.toString(block.getLocation(), ":", true, true)));
 				}

@@ -130,11 +130,11 @@ public class area implements Cmd {
 
             java.util.Map<String, RestrictedArea> areas = Jobs.getRestrictedAreaManager().getRestrictedAreas();
             if (areas.isEmpty()) {
-                sender.sendMessage(Jobs.getLanguage().getMessage("command.area.output.noAreas"));
+                Language.deliver(sender, Jobs.getLanguage().getMessage("command.area.output.noAreas"));
                 return true;
             }
 
-            sender.sendMessage(Jobs.getLanguage().getMessage("general.info.separator"));
+            Language.deliver(sender, Jobs.getLanguage().getMessage("general.info.separator"));
             int i = 0;
             for (Entry<String, RestrictedArea> area : areas.entrySet()) {
                 i++;

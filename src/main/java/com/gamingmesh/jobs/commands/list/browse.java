@@ -191,7 +191,7 @@ public class browse implements Cmd {
                         Language.sendMessage(sender, "command.info.help.newMax", "[max]", maxLevel);
 
                     if (Jobs.getGCManager().ShowTotalWorkers)
-                        sender.sendMessage(Jobs.getLanguage().getMessage("command.browse.output.totalWorkers", "[amount]", j.getTotalPlayers()));
+                        Language.deliver(sender, Jobs.getLanguage().getMessage("command.browse.output.totalWorkers", "[amount]", j.getTotalPlayers()));
 
                     if (Jobs.getGCManager().useDynamicPayment && Jobs.getGCManager().ShowPenaltyBonus) {
                         int bonus = (int) (j.getBonus() * 100);

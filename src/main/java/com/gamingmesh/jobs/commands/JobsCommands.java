@@ -33,6 +33,7 @@ import net.Zrips.CMILib.Container.PageInfo;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.Messages.CMIMessages;
 import net.Zrips.CMILib.RawMessages.RawMessage;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 
 public class JobsCommands implements CommandExecutor {
 
@@ -57,7 +58,7 @@ public class JobsCommands implements CommandExecutor {
 
         if (sender instanceof Player && !Jobs.getGCManager().canPerformActionInWorld(((Player) sender).getWorld())
             && !sender.hasPermission("jobs.disabledworld.commands")) {
-            sender.sendMessage(Jobs.getLanguage().getMessage("general.error.worldisdisabled"));
+            Language.deliver(sender, Jobs.getLanguage().getMessage("general.error.worldisdisabled"));
             return true;
         }
 
@@ -143,7 +144,7 @@ public class JobsCommands implements CommandExecutor {
         String message = Jobs.getLanguage().getMessage("command.help.output.cmdUsage");
         message = message.replace("[command]", getUsage(cmd));
         sender.sendMessage(message);
-        sender.sendMessage(Jobs.getLanguage().getMessage("command.help.output.helpPageDescription", "[description]", Jobs.getLanguage().getMessage("command." + cmd + ".help.info")));
+        Language.deliver(sender, Jobs.getLanguage().getMessage("command.help.output.helpPageDescription", "[description]", Jobs.getLanguage().getMessage("command." + cmd + ".help.info")));
     }
 
     protected boolean help(CommandSender sender, int page) {
@@ -154,13 +155,15 @@ public class JobsCommands implements CommandExecutor {
         }
 
         if (page < 1) {
-            CMIActionBar.send(sender, Jobs.getLanguage().getMessage("general.error.noHelpPage"));
+            if (sender instanceof Player)
+                MessageUtil.sendActionBar((Player) sender, Jobs.getLanguage().getMessage("general.error.noHelpPage"));
             return true;
         }
 
         PageInfo pi = new PageInfo(10, commands.size(), page);
         if (page > pi.getTotalPages()) {
-            CMIActionBar.send(sender, Jobs.getLanguage().getMessage("general.error.noHelpPage"));
+            if (sender instanceof Player)
+                MessageUtil.sendActionBar((Player) sender, Jobs.getLanguage().getMessage("general.error.noHelpPage"));
             return true;
         }
 
@@ -255,7 +258,7 @@ public class JobsCommands implements CommandExecutor {
             first = false;
 
         }
-        sender.sendMessage(Jobs.getLanguage().getMessage("command.info.help.actions", "%actions%", builder.toString()));
+        Language.deliver(sender, Jobs.getLanguage().getMessage("command.info.help.actions", "%actions%", builder.toString()));
     }
 
     /**

@@ -96,6 +96,8 @@ import net.Zrips.CMILib.Messages.CMIMessages;
 import net.Zrips.CMILib.NBT.CMINBT;
 import net.Zrips.CMILib.Version.Version;
 import net.Zrips.CMILib.Version.Schedulers.CMIScheduler;
+import com.gamingmesh.jobs.i18n.Language;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 
 public class JobsListener implements Listener {
 
@@ -179,11 +181,11 @@ public class JobsListener implements Listener {
 
 		if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
 			Jobs.getSelectionManager().placeLoc1(player, loc);
-			player.sendMessage(Jobs.getLanguage().getMessage("command.area.output.selected1", "%x%", loc.getBlockX(), "%y%", loc.getBlockY(), "%z%", loc.getBlockZ()));
+			Language.deliver(player, Jobs.getLanguage().getMessage("command.area.output.selected1", "%x%", loc.getBlockX(), "%y%", loc.getBlockY(), "%z%", loc.getBlockZ()));
 			event.setCancelled(true);
 		} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			Jobs.getSelectionManager().placeLoc2(player, loc);
-			player.sendMessage(Jobs.getLanguage().getMessage("command.area.output.selected2", "%x%", loc.getBlockX(), "%y%", loc.getBlockY(), "%z%", loc.getBlockZ()));
+			Language.deliver(player, Jobs.getLanguage().getMessage("command.area.output.selected2", "%x%", loc.getBlockX(), "%y%", loc.getBlockY(), "%z%", loc.getBlockZ()));
 			event.setCancelled(true);
 		}
 
@@ -288,7 +290,7 @@ public class JobsListener implements Listener {
 		Player player = event.getPlayer();
 		if (plugin.getComplement().getLine((Sign) block.getState(), 0).contains(Jobs.getLanguage().getMessage("signs.topline")) && !player.hasPermission("jobs.command.signs")) {
 			event.setCancelled(true);
-			player.sendMessage(Jobs.getLanguage().getMessage("signs.cantdestroy"));
+			Language.deliver(player, Jobs.getLanguage().getMessage("signs.cantdestroy"));
 			return;
 		}
 
@@ -297,7 +299,7 @@ public class JobsListener implements Listener {
 
 		if (!player.hasPermission("jobs.command.signs")) {
 			event.setCancelled(true);
-			player.sendMessage(Jobs.getLanguage().getMessage("signs.cantdestroy"));
+			Language.deliver(player, Jobs.getLanguage().getMessage("signs.cantdestroy"));
 			return;
 		}
 
@@ -324,13 +326,13 @@ public class JobsListener implements Listener {
 		Player player = event.getPlayer();
 		if (!player.hasPermission("jobs.command.signs")) {
 			event.setCancelled(true);
-			player.sendMessage(Jobs.getLanguage().getMessage("signs.cantcreate"));
+			Language.deliver(player, Jobs.getLanguage().getMessage("signs.cantcreate"));
 			return;
 		}
 
 		final Job job = Jobs.getJob(CMIChatColor.stripColor(plugin.getComplement().getLine(event, 2)).toLowerCase());
 		if (type == SignTopType.toplist && job == null) {
-			player.sendMessage(Jobs.getLanguage().getMessage("command.top.error.nojob"));
+			Language.deliver(player, Jobs.getLanguage().getMessage("command.top.error.nojob"));
 			return;
 		}
 
@@ -381,7 +383,7 @@ public class JobsListener implements Listener {
 
 		if (!event.getPlayer().hasPermission("jobs.command.signs")) {
 			event.setCancelled(true);
-			event.getPlayer().sendMessage(Jobs.getLanguage().getMessage("signs.cantcreate"));
+			Language.deliver(event.getPlayer(), Jobs.getLanguage().getMessage("signs.cantcreate"));
 			return;
 		}
 
@@ -459,7 +461,7 @@ public class JobsListener implements Listener {
 			if (prog.getLevel() >= oneItem.getLevel() || !oneItem.getNode().equalsIgnoreCase(node))
 				continue;
 
-			CMIActionBar.send(jPlayer.getPlayer(), Jobs.getLanguage().getMessage("limitedItem.error.levelup", job));
+			MessageUtil.sendActionBar(jPlayer.getPlayer(), Jobs.getLanguage().getMessage("limitedItem.error.levelup", job));
 			return true;
 		}
 
@@ -533,7 +535,7 @@ public class JobsListener implements Listener {
 
 		if (meinOk != null) {
 			event.setCancelled(true);
-			CMIActionBar.send(player, Jobs.getLanguage().getMessage("limitedItem.error.levelup", meinOk));
+			MessageUtil.sendActionBar(player, Jobs.getLanguage().getMessage("limitedItem.error.levelup", meinOk));
 
 			iih = JobLimitedItems.applyNBT(iih, jobId, itemNode);
 			try {

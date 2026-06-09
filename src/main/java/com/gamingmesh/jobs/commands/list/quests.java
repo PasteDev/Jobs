@@ -155,7 +155,7 @@ public class quests implements Cmd {
             }
         }
 
-        sender.sendMessage(Jobs.getLanguage().getMessage("general.info.separator"));
+        Language.deliver(sender, Jobs.getLanguage().getMessage("general.info.separator"));
         return true;
     }
 

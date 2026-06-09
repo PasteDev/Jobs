@@ -87,7 +87,7 @@ public class exp implements Cmd {
             try {
                 amount = Double.parseDouble(args[3]);
             } catch (NumberFormatException e) {
-                sender.sendMessage(Jobs.getLanguage().getMessage("general.admin.error"));
+                Language.deliver(sender, Jobs.getLanguage().getMessage("general.admin.error"));
                 return true;
             }
         }

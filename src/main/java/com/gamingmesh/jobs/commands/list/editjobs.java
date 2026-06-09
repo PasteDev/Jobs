@@ -23,6 +23,7 @@ import net.Zrips.CMILib.Items.CMIMaterial;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.RawMessages.RawMessage;
 import net.Zrips.CMILib.Version.Version;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class editjobs implements Cmd {
 
@@ -201,7 +202,7 @@ public class editjobs implements Cmd {
                     return false;
 
                 Util.getJobsEditorMap().put(player.getUniqueId(), "jobs editjobs modify " + job.getName() + " " + actionT.getName() + " " + jInfo.getName() + " " + type.getName() + " ");
-                sender.sendMessage(Jobs.getLanguage().getMessage("command.editjobs.help.modify.newValue"));
+                Language.deliver(sender, Jobs.getLanguage().getMessage("command.editjobs.help.modify.newValue"));
                 return true;
             }
 

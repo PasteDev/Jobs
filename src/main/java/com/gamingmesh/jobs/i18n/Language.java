@@ -34,7 +34,6 @@ import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.config.YmlMaker;
 import com.gamingmesh.jobs.container.Job;
 
-import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Messages.CMIMessages;
 
 public class Language {
@@ -43,6 +42,7 @@ public class Language {
 
     private static final Pattern NEW_LINE_PATTERN = Pattern.compile("([ ]?[\\/][n][$|\\s])");
     private static final Pattern LANG_TAG_PATTERN = Pattern.compile("^<lang:([^>]+)>$");
+    private static final Pattern EMBEDDED_LANG_TAG_PATTERN = Pattern.compile("<lang:([^>]+)>");
 
     private static final Pattern JOB_NAME_PATTERN = Pattern.compile("(?i)[\\[%]jobname[\\]%]");
     private static final Pattern JOB_DISPLAY_NAME_PATTERN = Pattern.compile("(?i)[\\[%]jobdisplayname[\\]%]");
@@ -73,7 +73,11 @@ public class Language {
         String msg = Jobs.getLanguage().getMessage(key, variables);
         if (msg.isEmpty())
             return;
-        sender.sendMessage(msg);
+        deliver(sender, msg);
+    }
+
+    public static void deliver(CommandSender sender, String message) {
+        MessageUtil.send(sender, message);
     }
 
     /**
@@ -90,9 +94,9 @@ public class Language {
         String msg = "";
         try {
             if (!customlocale.contains(key))
-                msg = enlocale.isString(key) ? CMIChatColor.translate(enlocale.getString(key)) : missing;
+                msg = enlocale.isString(key) ? MessageUtil.colorize(enlocale.getString(key)) : missing;
             else
-                msg = customlocale.isString(key) ? CMIChatColor.translate(customlocale.getString(key)) : missing;
+                msg = customlocale.isString(key) ? MessageUtil.colorize(customlocale.getString(key)) : missing;
         } catch (Exception e) {
             CMIMessages.consoleMessage("&e[Jobs] &2Can't read language file for: " + key);
             CMIMessages.consoleMessage(e.getLocalizedMessage());
@@ -128,17 +132,17 @@ public class Language {
         if (isLangTag(msg)) {
             return appendLangArgs(msg, variables);
         }
-        return applyVariables(msg, variables);
+        return containsLangTag(msg) ? applyLangVariables(msg, variables) : applyVariables(msg, variables);
     }
 
     public String getMessage(Player player, String key, Object... variables) {
         String template = getMessage(key);
         if (player == null || template == null || template.isEmpty()) {
-            return applyVariables(template, variables);
+            return applyLangVariables(template, variables);
         }
-        String msg = isLangTag(template) ? appendLangArgs(template, variables) : applyVariables(template, variables);
+        String msg = applyLangVariables(template, variables);
         msg = Jobs.getInstance().getPlaceholderAPIManager().updatePlaceHolders(player, msg);
-        return isLangTag(template) ? msg : applyVariables(msg, variables);
+        return usesLangTag(template) ? msg : applyVariables(msg, variables);
     }
 
     /**
@@ -161,7 +165,7 @@ public class Language {
             for (int i = 0; i < ls.size(); i++) {
                 String msg = ls.get(i);
                 msg = isLangTag(msg) ? appendLangArgs(msg, variables) : applyVariables(msg, variables);
-                ls.set(i, CMIChatColor.translate(filterNewLine(msg)));
+                ls.set(i, MessageUtil.colorize(filterNewLine(msg)));
             }
 
         return ls;
@@ -218,6 +222,34 @@ public class Language {
 
     private boolean isLangTag(String msg) {
         return msg != null && LANG_TAG_PATTERN.matcher(msg.trim()).matches();
+    }
+
+    private boolean containsLangTag(String msg) {
+        return msg != null && msg.contains("<lang:");
+    }
+
+    private boolean usesLangTag(String msg) {
+        return isLangTag(msg) || containsLangTag(msg);
+    }
+
+    private String applyLangVariables(String msg, Object... variables) {
+        if (msg == null || msg.isEmpty()) {
+            return msg;
+        }
+        if (isLangTag(msg)) {
+            return appendLangArgs(msg, variables);
+        }
+        if (!containsLangTag(msg)) {
+            return applyVariables(msg, variables);
+        }
+        Matcher matcher = EMBEDDED_LANG_TAG_PATTERN.matcher(msg);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String replacement = appendLangArgs("<lang:" + matcher.group(1) + ">", variables);
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(sb);
+        return applyVariables(sb.toString(), variables);
     }
 
     private String appendLangArgs(String msg, Object... variables) {
@@ -280,7 +312,15 @@ public class Language {
         if (value == null) {
             return;
         }
-        suffix.append("|").append(key).append("=").append(URLEncoder.encode(value, StandardCharsets.UTF_8));
+        suffix.append("|").append(key).append("=").append(encodeLangValue(value));
+    }
+
+    private String encodeLangValue(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
+        } catch (java.io.UnsupportedEncodingException e) {
+            return value;
+        }
     }
 
     public String filterNewLine(String msg) {
@@ -296,7 +336,7 @@ public class Language {
 
         for (String part : text) {
             if (colorize)
-                part = CMIChatColor.translate(part);
+                part = MessageUtil.colorize(part);
 
             temp.add(part);
         }

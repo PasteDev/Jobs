@@ -39,6 +39,7 @@ import net.Zrips.CMILib.Items.CMIMaterial;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.Messages.CMIMessages;
 import net.Zrips.CMILib.NBT.CMINBT;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class ShopManager {
 
@@ -101,7 +102,7 @@ public class ShopManager {
     public boolean openShopGui(Player player, int page) {
         List<ShopItem> ls = getItemsByPage(page);
         if (ls.isEmpty()) {
-            player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.cantOpen"));
+            Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.cantOpen"));
             return false;
         }
 
@@ -205,7 +206,7 @@ public class ShopManager {
                 public void click(GUIClickType type) {
                     for (String onePerm : item.getRequiredPerm()) {
                         if (!player.hasPermission(onePerm)) {
-                            player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.NoPermForItem"));
+                            Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoPermForItem"));
                             return;
                         }
                     }
@@ -217,7 +218,7 @@ public class ShopManager {
 
                         JobProgression playerJob = jPlayer.getJobProgression(tempJob);
                         if (playerJob == null || playerJob.getLevel() < oneJob.getValue()) {
-                            player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.NoJobReqForitem",
+                            Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoJobReqForitem",
                                 tempJob,
                                 "%joblevel%", oneJob.getValue()));
                             return;
@@ -225,23 +226,23 @@ public class ShopManager {
                     }
 
                     if (item.getPointPrice() > 0 && (jPlayer.getPointsData().getCurrentPoints() <= 0 || jPlayer.getPointsData().getCurrentPoints() < item.getPointPrice())) {
-                        player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.NoPoints"));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoPoints"));
                         return;
                     }
 
                     if (item.getVaultPrice() > 0 && (jPlayer.getBalance() <= 0 || jPlayer.getBalance() < item.getVaultPrice())) {
-                        player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.NoMoney"));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoMoney"));
                         return;
                     }
 
                     int totalLevels = jPlayer.getTotalLevels();
                     if (item.getRequiredTotalLevels() != -1 && totalLevels < item.getRequiredTotalLevels()) {
-                        player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.NoTotalLevel", "%totalLevel%", totalLevels));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoTotalLevel", "%totalLevel%", totalLevels));
                         return;
                     }
 
                     if (player.getInventory().firstEmpty() == -1) {
-                        player.sendMessage(Jobs.getLanguage().getMessage(player, "message.crafting.fullinventory"));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "message.crafting.fullinventory"));
                         return;
                     }
 
@@ -271,12 +272,12 @@ public class ShopManager {
                     if (item.getPointPrice() > 0) {
                         jPlayer.getPointsData().takePoints(item.getPointPrice());
                         Jobs.getJobsDAO().savePoints(jPlayer);
-                        player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.Paid", "%amount%", item.getPointPrice()));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.Paid", "%amount%", item.getPointPrice()));
                     }
 
                     if (item.getVaultPrice() > 0) {
                         jPlayer.withdraw(item.getVaultPrice());
-                        player.sendMessage(Jobs.getLanguage().getMessage(player, "command.shop.info.Paid", "%amount%", Jobs.getEconomy().getEconomy().format(item.getVaultPrice())));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.Paid", "%amount%", Jobs.getEconomy().getEconomy().format(item.getVaultPrice())));
                     }
 
                     openShopGui(player, page);

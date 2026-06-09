@@ -30,6 +30,7 @@ import net.Zrips.CMILib.FileHandler.ConfigReader;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.RawMessages.RawMessage;
 import net.Zrips.CMILib.RawMessages.RawMessageCommand;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class editquests implements Cmd {
 
@@ -422,7 +423,7 @@ public class editquests implements Cmd {
                         Job j = Jobs.getJob(message);
 
                         if (j == null) {
-                            sender.sendMessage(Jobs.getLanguage().getMessage("general.error.jobname"));
+                            Language.deliver(sender, Jobs.getLanguage().getMessage("general.error.jobname"));
                             return;
                         }
 

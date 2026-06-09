@@ -66,7 +66,8 @@ import com.gamingmesh.jobs.i18n.Language;
 import com.gamingmesh.jobs.stuff.ToggleBarHandling;
 import com.gamingmesh.jobs.stuff.Util;
 
-import net.Zrips.CMILib.ActionBar.CMIActionBar;
+import com.gamingmesh.jobs.i18n.MessageUtil;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 import net.Zrips.CMILib.Container.CMINumber;
 import net.Zrips.CMILib.Items.CMIItemStack;
 import net.Zrips.CMILib.Items.CMIMaterial;
@@ -736,10 +737,10 @@ public class PlayerManager {
             if (player != null && (Jobs.getGCManager().LevelChangeActionBar || Jobs.getGCManager().LevelChangeChat)) {
                 for (String line : message.split("\n")) {
                     if (Jobs.getGCManager().LevelChangeActionBar)
-                        CMIActionBar.send(player, line);
+                        MessageUtil.sendActionBar(player, line);
 
                     if (Jobs.getGCManager().LevelChangeChat)
-                        player.sendMessage(line);
+                        MessageUtil.send(player, line);
                 }
             }
 
@@ -820,17 +821,16 @@ public class PlayerManager {
             }, Jobs.getGCManager().ShootTime);
         }
 
-        String message = Jobs.getLanguage().getMessage("message.levelup." + (Jobs.getGCManager().isBroadcastingLevelups() ? "broadcast" : "nobroadcast"));
-
-        message = Language.updateJob(message, job);
-
-        if (levelUpEvent.getOldTitle() != null)
-            message = message.replace("%titlename%", levelUpEvent.getOldTitle()
-                .getChatColor().toString() + levelUpEvent.getOldTitle().getName());
-
-        message = message.replace("%playername%", jPlayer.getName());
-        message = message.replace("%playerdisplayname%", jPlayer.getDisplayName());
-        message = message.replace("%joblevel%", prog.getLevelFormatted());
+        String titleName = levelUpEvent.getOldTitle() != null
+            ? levelUpEvent.getOldTitle().getChatColor().toString() + levelUpEvent.getOldTitle().getName()
+            : "";
+        String message = Jobs.getLanguage().getMessage(player,
+            "message.levelup." + (Jobs.getGCManager().isBroadcastingLevelups() ? "broadcast" : "nobroadcast"),
+            "%joblevel%", prog.getLevelFormatted(),
+            job,
+            "%playername%", jPlayer.getName(),
+            "%playerdisplayname%", jPlayer.getDisplayName(),
+            "%titlename%", titleName);
 
         if (Jobs.getGCManager().isBroadcastingLevelups() || Jobs.getGCManager().LevelChangeActionBar || Jobs.getGCManager().LevelChangeChat) {
             for (String line : message.split("\n")) {
@@ -840,10 +840,10 @@ public class PlayerManager {
                         plugin.getComplement().broadcastMessage(line);
                 } else if (player != null) {
                     if (Jobs.getGCManager().LevelChangeActionBar)
-                        CMIActionBar.send(player, line);
+                        MessageUtil.sendActionBar(player, line);
 
                     if (Jobs.getGCManager().LevelChangeChat)
-                        player.sendMessage(line);
+                        MessageUtil.send(player, line);
                 }
             }
         }
@@ -856,16 +856,12 @@ public class PlayerManager {
                 }
             }
 
-            // user would skill up
-            message = Jobs.getLanguage().getMessage("message.skillup." + (Jobs.getGCManager().isBroadcastingSkillups()
-                ? "broadcast" : "nobroadcast"));
-
-            message = message.replace("%playername%", jPlayer.getName());
-            message = message.replace("%playerdisplayname%", jPlayer.getDisplayName());
-            message = message.replace("%titlename%", levelUpEvent.getNewTitle()
-                .getChatColor().toString() + levelUpEvent.getNewTitle().getName());
-
-            message = Language.updateJob(message, job);
+            message = Jobs.getLanguage().getMessage(player,
+                "message.skillup." + (Jobs.getGCManager().isBroadcastingSkillups() ? "broadcast" : "nobroadcast"),
+                job,
+                "%playername%", jPlayer.getName(),
+                "%playerdisplayname%", jPlayer.getDisplayName(),
+                "%titlename%", levelUpEvent.getNewTitle().getChatColor().toString() + levelUpEvent.getNewTitle().getName());
 
             if (Jobs.getGCManager().isBroadcastingSkillups() || Jobs.getGCManager().TitleChangeActionBar || Jobs.getGCManager().TitleChangeChat) {
                 for (String line : message.split("\n")) {
@@ -873,10 +869,10 @@ public class PlayerManager {
                         plugin.getComplement().broadcastMessage(line);
                     } else if (player != null) {
                         if (Jobs.getGCManager().TitleChangeActionBar)
-                            CMIActionBar.send(player, line);
+                            MessageUtil.sendActionBar(player, line);
 
                         if (Jobs.getGCManager().TitleChangeChat)
-                            player.sendMessage(line);
+                            MessageUtil.send(player, line);
                     }
                 }
             }

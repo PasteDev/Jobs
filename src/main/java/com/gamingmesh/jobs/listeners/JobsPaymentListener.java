@@ -133,6 +133,8 @@ import net.Zrips.CMILib.PersistentData.CMIPersistentDataContainer;
 import net.Zrips.CMILib.Version.Version;
 import net.Zrips.CMILib.Version.Schedulers.CMIScheduler;
 import uk.antiperson.stackmob.entity.StackEntity;
+import com.gamingmesh.jobs.i18n.Language;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 
 public final class JobsPaymentListener implements Listener {
 
@@ -190,7 +192,7 @@ public final class JobsPaymentListener implements Listener {
         Player player = (Player) event.getWhoClicked();
         //Check if inventory is full and using shift click, possible money dupping fix
         if (player.getInventory().firstEmpty() == -1 && event.isShiftClick()) {
-            player.sendMessage(Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
+            Language.deliver(player, Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
             return;
         }
 
@@ -292,7 +294,7 @@ public final class JobsPaymentListener implements Listener {
             if (time != null) {
                 if (System.currentTimeMillis() < time + Jobs.getGCManager().CowMilkingTimer) {
                     long timer = ((Jobs.getGCManager().CowMilkingTimer - (System.currentTimeMillis() - time)) / 1000);
-                    player.sendMessage(Jobs.getLanguage().getMessage("message.cowtimer", "%time%", timer));
+                    Language.deliver(player, Jobs.getLanguage().getMessage("message.cowtimer", "%time%", timer));
 
                     if (Jobs.getGCManager().CancelCowMilking)
                         event.setCancelled(true);
@@ -627,7 +629,7 @@ public final class JobsPaymentListener implements Listener {
 
         //Check if inventory is full and using shift click, possible money dupping fix
         if (player.getInventory().firstEmpty() == -1 && event.isShiftClick()) {
-            player.sendMessage(Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
+            Language.deliver(player, Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
             return;
         }
 
@@ -904,7 +906,7 @@ public final class JobsPaymentListener implements Listener {
 
         //Check if inventory is full and using shift click, possible money dupping fix
         if (player.getInventory().firstEmpty() == -1 && event.isShiftClick()) {
-            player.sendMessage(Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
+            Language.deliver(player, Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
             return;
         }
 
@@ -1795,15 +1797,15 @@ public final class JobsPaymentListener implements Listener {
                     report = true;
 
                 if (report)
-                    CMIActionBar.send(p, Jobs.getLanguage().getMessage("general.error.noRegistration", "[block]", name));
+                    MessageUtil.sendActionBar(p, Jobs.getLanguage().getMessage("general.error.noRegistration", "[block]", name));
             } else if (done == ownershipFeedback.newReg && jPlayer != null && jPlayer.getMaxOwnerShipAllowed(blockOwner.getType()) > 0) {
 
-                CMIActionBar.send(p, Jobs.getLanguage().getMessage("general.error.newRegistration", "[block]", name,
+                MessageUtil.sendActionBar(p, Jobs.getLanguage().getMessage("general.error.newRegistration", "[block]", name,
                     "[current]", blockOwner.getTotal(jPlayer.getUniqueId()),
                     "[max]", jPlayer.getMaxOwnerShipAllowed(blockOwner.getType()) == 0 ? "-" : jPlayer.getMaxOwnerShipAllowed(blockOwner.getType())));
 
             } else if (done == ownershipFeedback.reenabled && jPlayer != null) {
-                CMIActionBar.send(p, Jobs.getLanguage().getMessage("general.error.reenabledBlock"));
+                MessageUtil.sendActionBar(p, Jobs.getLanguage().getMessage("general.error.reenabledBlock"));
             }
 
             BlockOwnerShip.saveDelay();

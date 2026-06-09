@@ -35,7 +35,7 @@ public class join implements Cmd {
         Job job = Jobs.getJob(args[0]);
         if (job == null) {
             // job does not exist
-            sender.sendMessage(Jobs.getLanguage().getMessage("general.error.job"));
+            Language.deliver(sender, Jobs.getLanguage().getMessage("general.error.job"));
             return true;
         }
 

@@ -23,6 +23,7 @@ import net.Zrips.CMILib.Items.CMIMaterial;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.Messages.CMIMessages;
 import net.Zrips.CMILib.RawMessages.RawMessage;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class itembonus implements Cmd {
 
@@ -51,7 +52,7 @@ public class itembonus implements Cmd {
                 items.add(oneArmor);
         }
 
-        sender.sendMessage(Jobs.getLanguage().getMessage("command.bonus.output.topline"));
+        Language.deliver(sender, Jobs.getLanguage().getMessage("command.bonus.output.topline"));
 
         for (ItemStack oneI : items) {
             JobItems jitem = Jobs.getPlayerManager().getJobsItemByNbt(oneI);

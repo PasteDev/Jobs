@@ -254,7 +254,7 @@ public class GuiManager {
 							if (!Jobs.getGCManager().DisableJoiningJobThroughGui) {
 								Jobs.getCommandManager().onCommand(player, null, "jobs", new String[] { "join", job.getName() });
 							} else {
-								player.sendMessage(Jobs.getLanguage().getMessage(player, "command.info.gui.cantJoin"));
+								Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.info.gui.cantJoin"));
 							}
 							openJobsBrowseGUI(player);
 						} else {
@@ -274,7 +274,7 @@ public class GuiManager {
 							if (!Jobs.getGCManager().DisableJoiningJobThroughGui) {
 								Jobs.getCommandManager().onCommand(player, null, "jobs", new String[] { "join", job.getName() });
 							} else {
-								player.sendMessage(Jobs.getLanguage().getMessage(player, "command.info.gui.cantJoin"));
+								Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.info.gui.cantJoin"));
 							}
 							openJobsBrowseGUI(player);
 						}

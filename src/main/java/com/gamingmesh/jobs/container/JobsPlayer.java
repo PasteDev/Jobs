@@ -50,6 +50,8 @@ import net.Zrips.CMILib.Items.CMIMaterial;
 import net.Zrips.CMILib.Time.CMITimeManager;
 import net.Zrips.CMILib.Version.Schedulers.CMIScheduler;
 import net.Zrips.CMILib.Version.Schedulers.CMITask;
+import com.gamingmesh.jobs.i18n.Language;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 
 public class JobsPlayer {
 
@@ -245,19 +247,19 @@ public class JobsPlayer {
 
             if (!data.isInformed() && player.isOnline() && !data.isReseted(type)) {
                 if (Jobs.getGCManager().useMaxPaymentCurve) {
-                    player.sendMessage(Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit"));
-                    player.sendMessage(Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit2"));
-                    player.sendMessage(Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit3"));
+                    Language.deliver(player, Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit"));
+                    Language.deliver(player, Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit2"));
+                    Language.deliver(player, Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit3"));
                 } else {
-                    player.sendMessage(Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit"));
-                    player.sendMessage(Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit2"));
+                    Language.deliver(player, Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit"));
+                    Language.deliver(player, Jobs.getLanguage().getMessage("command.limit.output.reached" + name + "limit2"));
                 }
 
                 data.setInformed(true);
             }
 
             if (data.isAnnounceTime(limit.getAnnouncementDelay()) && player.isOnline())
-                CMIActionBar.send(player, Jobs.getLanguage().getMessage("command.limit.output." + name + "time", "%time%", CMITimeManager.to24hourShort(data.getLeftTime(type))));
+                MessageUtil.sendActionBar(player, Jobs.getLanguage().getMessage("command.limit.output." + name + "time", "%time%", CMITimeManager.to24hourShort(data.getLeftTime(type))));
 
             if (data.isReseted(type))
                 data.setReseted(type, false);
