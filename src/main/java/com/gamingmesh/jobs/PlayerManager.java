@@ -333,6 +333,15 @@ public class PlayerManager {
      * Save all the information of all of the players
      */
     public void saveAll() {
+        saveAll(false);
+    }
+
+    /**
+     * Save all the information of all of the players
+     *
+     * @param force when true, saves synchronously and ignores the isSaved flag
+     */
+    public void saveAll(boolean force) {
         /*
          * Saving is a three step process to minimize synchronization locks when called asynchronously.
          *
@@ -340,8 +349,19 @@ public class PlayerManager {
          * 2) Perform save on all players on copied list.
          * 3) Garbage collect the real list to remove any offline players with saved data
          */
-        for (JobsPlayer jPlayer : new ArrayList<>(playersUUID.values()))
-            jPlayer.save();
+        Map<UUID, JobsPlayer> targets = new LinkedHashMap<>();
+        for (JobsPlayer jPlayer : playersUUID.values())
+            targets.put(jPlayer.getUniqueId(), jPlayer);
+
+        if (force) {
+            for (JobsPlayer jPlayer : playersUUIDCache.values()) {
+                if (!jPlayer.isSaved())
+                    targets.putIfAbsent(jPlayer.getUniqueId(), jPlayer);
+            }
+        }
+
+        for (JobsPlayer jPlayer : targets.values())
+            jPlayer.save(false, force);
 
         playersUUID.values().removeIf(jPlayer -> jPlayer.isSaved() && !jPlayer.isOnline());
 

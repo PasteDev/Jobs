@@ -996,7 +996,7 @@ public final class Jobs extends JavaPlugin {
 		if (pManager != null) {
 			pManager.removePlayerAdditions();
 			CMIMessages.consoleMessage("&eCleared boss bar cache");
-			pManager.saveAll();
+			pManager.saveAll(true);
 			CMIMessages.consoleMessage("&eSaved player data");
 		}
 

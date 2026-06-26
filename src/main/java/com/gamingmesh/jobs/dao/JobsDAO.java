@@ -1999,6 +1999,18 @@ public abstract class JobsDAO {
         this.service.execute(() -> save(player));
     }
 
+    public void savePlayerAsync(JobsPlayer player, Runnable onComplete) {
+        this.service.execute(() -> {
+            save(player);
+            saveLog(player);
+            savePoints(player);
+            recordPlayersLimits(player);
+            updateSeen(player);
+            if (onComplete != null)
+                onComplete.run();
+        });
+    }
+
     /**
      * Save player-job information
      * @param jobInfo - the information getting saved
