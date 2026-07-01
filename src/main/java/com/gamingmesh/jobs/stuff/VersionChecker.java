@@ -24,42 +24,10 @@ public final class VersionChecker {
     }
 
     public void VersionCheck(final Player player) {
-        if (!Jobs.getGCManager().isShowNewVersion())
-            return;
-
-        CMIScheduler.runTaskAsynchronously(plugin, () -> {
-            String newVersion = getNewVersion();
-            if (newVersion == null)
-                return;
-
-            int currentVersion = Integer.parseInt(plugin.getDescription().getVersion().replace(".", ""));
-            int newVer = Integer.parseInt(newVersion.replace(".", ""));
-
-            if (newVer <= currentVersion || currentVersion >= newVer)
-                return;
-
-            List<String> msg = Arrays.asList(
-                ChatColor.GREEN + "*********************** " + plugin.getDescription().getName() + " **************************",
-                ChatColor.GREEN + "* " + newVersion + " is now available! Your version: " + currentVersion,
-                ChatColor.GREEN + "* " + ChatColor.DARK_GREEN + plugin.getDescription().getWebsite(),
-                ChatColor.GREEN + "************************************************************");
-            for (String one : msg)
-                if (player != null)
-                    player.sendMessage(one);
-                else
-                    CMIMessages.consoleMessage(one);
-        });
+        return;
     }
 
     public String getNewVersion() {
-        try {
-            URLConnection con = new URL("https://api.spigotmc.org/legacy/update.php?resource=4216").openConnection();
-            String version = new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
-            if (version.length() <= 8)
-                return version;
-        } catch (Throwable t) {
-            CMIMessages.consoleMessage("&cFailed to check for " + plugin.getDescription().getName() + " update on spigot web page.");
-        }
         return null;
     }
 

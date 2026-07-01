@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.commands.Cmd;
-import com.gamingmesh.jobs.config.JLC;
 import com.gamingmesh.jobs.container.Job;
 import com.gamingmesh.jobs.container.JobProgression;
 import com.gamingmesh.jobs.container.JobsPlayer;
@@ -43,13 +42,13 @@ public class exp implements Cmd {
 
         JobsPlayer jPlayer = Jobs.getPlayerManager().getJobsPlayer(args[0]);
         if (jPlayer == null) {
-            JLC.general_error_noinfoByPlayer.sendMessage(sender, "%playername%", args[0]);
+            Language.sendMessage(sender, "general.error.noinfoByPlayer", "%playername%", args[0]);
             return true;
         }
 
         Job job = Jobs.getJob(args[1]);
         if (job == null) {
-            JLC.general_error_job.sendMessage(sender);
+            Language.sendMessage(sender, "general.error.job");
             return true;
         }
 
@@ -88,7 +87,7 @@ public class exp implements Cmd {
             try {
                 amount = Double.parseDouble(args[3]);
             } catch (NumberFormatException e) {
-                JLC.general_admin_error.sendMessage(sender);
+                Language.deliver(sender, Jobs.getLanguage().getMessage("general.admin.error"));
                 return true;
             }
         }
@@ -129,14 +128,14 @@ public class exp implements Cmd {
 
             if (!silent)
                 Language.sendMessage(player, "command.exp.output.target", job, "%level%", prog.getLevelFormatted(), "%exp%", prog
-                        .getExperience());
+                    .getExperience());
 
             if (!silentAdmin)
-                JLC.general_admin_success.sendMessage(sender);
+                Language.sendMessage(sender, "general.admin.success");
 
         } catch (Exception e) {
             if (!silentAdmin)
-                JLC.general_admin_error.sendMessage(sender);
+                Language.sendMessage(sender, "general.admin.error");
             e.printStackTrace();
         }
         return true;

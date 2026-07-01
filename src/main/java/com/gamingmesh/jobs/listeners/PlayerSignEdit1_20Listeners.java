@@ -20,6 +20,7 @@ import com.gamingmesh.jobs.container.ActionType;
 import com.gamingmesh.jobs.container.JobsPlayer;
 
 import net.Zrips.CMILib.Colors.CMIChatColor;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class PlayerSignEdit1_20Listeners implements Listener {
 
@@ -72,7 +73,7 @@ public class PlayerSignEdit1_20Listeners implements Listener {
 
         //Check if inventory is full and using shift click, possible money dupping fix
         if (player.getInventory().firstEmpty() == -1 && event.isShiftClick()) {
-            player.sendMessage(Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
+            Language.deliver(player, Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
             return;
         }
 

@@ -7,7 +7,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 
-import net.Zrips.CMILib.Colors.CMIChatColor;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 
 public interface Complement {
 
@@ -22,18 +22,12 @@ public interface Complement {
     void setLine(Sign sign, int line, String text);
 
     default void broadcastMessage(String message) {
-	message = CMIChatColor.translate(message);
-	for (Player player : Bukkit.getOnlinePlayers()) {
-	    player.sendMessage(message);
-	}
+	MessageUtil.broadcast(message);
     }
 
     default void broadcastMessage(List<String> messages) {
 	for (String msg : messages) {
-	    msg = CMIChatColor.translate(msg);
-	    for (Player player : Bukkit.getOnlinePlayers()) {
-		player.sendMessage(msg);
-	    }
+	    MessageUtil.broadcast(msg);
 	}
     }
 }

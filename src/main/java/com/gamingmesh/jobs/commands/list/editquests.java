@@ -12,7 +12,6 @@ import org.bukkit.command.CommandSender;
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.commands.Cmd;
 import com.gamingmesh.jobs.commands.JobsCommands;
-import com.gamingmesh.jobs.config.JLC;
 import com.gamingmesh.jobs.container.Job;
 import com.gamingmesh.jobs.container.Quest;
 import com.gamingmesh.jobs.container.QuestObjective;
@@ -31,6 +30,7 @@ import net.Zrips.CMILib.FileHandler.ConfigReader;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.RawMessages.RawMessage;
 import net.Zrips.CMILib.RawMessages.RawMessageCommand;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class editquests implements Cmd {
 
@@ -423,7 +423,7 @@ public class editquests implements Cmd {
                         Job j = Jobs.getJob(message);
 
                         if (j == null) {
-                            JLC.general_error_jobname.sendMessage(sender);
+                            Language.deliver(sender, Jobs.getLanguage().getMessage("general.error.jobname"));
                             return;
                         }
 

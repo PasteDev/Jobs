@@ -20,6 +20,7 @@ import net.Zrips.CMILib.Container.CMIBlock;
 import net.Zrips.CMILib.Container.CMIBlock.Bisect;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import net.Zrips.CMILib.Version.Schedulers.CMIScheduler;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 
 public class BlockProtectionManager {
 
@@ -260,7 +261,7 @@ public class BlockProtectionManager {
                 if ((time > System.currentTimeMillis() || bp.isPaid()) && bp.getAction() != DBAction.DELETE) {
                     if (inform && player.canGetPaid(info)) {
                         int sec = Math.round((time - System.currentTimeMillis()) / 1000L);
-                        CMIActionBar.send(player.getPlayer(), Jobs.getLanguage().getMessage("message.blocktimer", "[time]", sec));
+                        MessageUtil.sendActionBar(player.getPlayer(), Jobs.getLanguage().getMessage("message.blocktimer", "[time]", sec));
                     }
 
                     return false;
@@ -285,7 +286,7 @@ public class BlockProtectionManager {
                     if ((time > System.currentTimeMillis() || bp.isPaid()) && bp.getAction() != DBAction.DELETE) {
                         if (inform && player.canGetPaid(info)) {
                             int sec = Math.round((time - System.currentTimeMillis()) / 1000L);
-                            CMIActionBar.send(player.getPlayer(), Jobs.getLanguage().getMessage("message.blocktimer", "[time]", sec));
+                            MessageUtil.sendActionBar(player.getPlayer(), Jobs.getLanguage().getMessage("message.blocktimer", "[time]", sec));
                         }
 
                         add(block, cd);

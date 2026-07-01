@@ -39,6 +39,7 @@ import net.Zrips.CMILib.Items.CMIMaterial;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.Messages.CMIMessages;
 import net.Zrips.CMILib.NBT.CMINBT;
+import com.gamingmesh.jobs.i18n.Language;
 
 public class ShopManager {
 
@@ -101,7 +102,7 @@ public class ShopManager {
     public boolean openShopGui(Player player, int page) {
         List<ShopItem> ls = getItemsByPage(page);
         if (ls.isEmpty()) {
-            player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.cantOpen"));
+            Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.cantOpen"));
             return false;
         }
 
@@ -109,7 +110,7 @@ public class ShopManager {
 
         CMIGui gui = new CMIGui(player);
         gui.setInvSize(guiSize);
-        gui.setTitle(Jobs.getLanguage().getMessage("command.shop.info.title"));
+        gui.setTitle(Jobs.getLanguage().getMessage(player, "command.shop.info.title"));
 
         JobsPlayer jPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
 
@@ -142,7 +143,7 @@ public class ShopManager {
             if (item.isHideIfNoEnoughPoints() && item.getPointPrice() > 0 &&
                 jPlayer.getPointsData().getCurrentPoints() < item.getPointPrice()) {
                 icon = CMIMaterial.STONE_BUTTON.newCMIItemStack();
-                lore.add(Jobs.getLanguage().getMessage("command.shop.info.NoPoints"));
+                lore.add(Jobs.getLanguage().getMessage(player, "command.shop.info.NoPoints"));
                 hiddenLore = true;
             }
 
@@ -155,17 +156,17 @@ public class ShopManager {
                 lore.addAll(icon.getLore());
 
                 if (item.getPointPrice() > 0) {
-                    String color = item.getPointPrice() >= points ? "" : Jobs.getLanguage().getMessage("command.shop.info.haveColor");
-                    lore.add(Jobs.getLanguage().getMessage("command.shop.info.pointsPrice", "%currentpoints%", color + points, "%price%", item.getPointPrice()));
+                    String color = item.getPointPrice() >= points ? "" : Jobs.getLanguage().getMessage(player, "command.shop.info.haveColor");
+                    lore.add(Jobs.getLanguage().getMessage(player, "command.shop.info.pointsPrice", "%currentpoints%", color + points, "%price%", item.getPointPrice()));
                 }
 
                 if (item.getVaultPrice() > 0) {
-                    String color = item.getVaultPrice() >= balance ? "" : Jobs.getLanguage().getMessage("command.shop.info.haveColor");
-                    lore.add(Jobs.getLanguage().getMessage("command.shop.info.moneyPrice", "%currentbalance%", color + Jobs.getEconomy().getEconomy().format(balance), "%price%", item.getVaultPrice()));
+                    String color = item.getVaultPrice() >= balance ? "" : Jobs.getLanguage().getMessage(player, "command.shop.info.haveColor");
+                    lore.add(Jobs.getLanguage().getMessage(player, "command.shop.info.moneyPrice", "%currentbalance%", color + Jobs.getEconomy().getEconomy().format(balance), "%price%", item.getVaultPrice()));
                 }
 
                 if (!item.getRequiredJobs().isEmpty()) {
-                    lore.add(Jobs.getLanguage().getMessage("command.shop.info.reqJobs"));
+                    lore.add(Jobs.getLanguage().getMessage(player, "command.shop.info.reqJobs"));
 
                     for (Entry<String, Integer> one : item.getRequiredJobs().entrySet()) {
                         Job job = Jobs.getJob(one.getKey());
@@ -178,22 +179,22 @@ public class ShopManager {
 
                         JobProgression prog = jPlayer.getJobProgression(job);
                         if (prog == null) {
-                            jobColor = Jobs.getLanguage().getMessage("command.shop.info.reqJobsColor");
-                            levelColor = Jobs.getLanguage().getMessage("command.shop.info.reqJobsLevelColor");
+                            jobColor = Jobs.getLanguage().getMessage(player, "command.shop.info.reqJobsColor");
+                            levelColor = Jobs.getLanguage().getMessage(player, "command.shop.info.reqJobsLevelColor");
                         }
 
                         if (prog != null && prog.getLevel() < one.getValue())
-                            levelColor = Jobs.getLanguage().getMessage("command.shop.info.reqJobsLevelColor");
+                            levelColor = Jobs.getLanguage().getMessage(player, "command.shop.info.reqJobsLevelColor");
 
-                        lore.add(Jobs.getLanguage().getMessage("command.shop.info.reqJobsList", "%jobsname%",
+                        lore.add(Jobs.getLanguage().getMessage(player, "command.shop.info.reqJobsList", "%jobsname%",
                             jobColor + one.getKey(), "%level%", levelColor + one.getValue()));
                     }
                 }
 
                 if (item.getRequiredTotalLevels() != -1) {
-                    lore.add(Jobs.getLanguage().getMessage("command.shop.info.reqTotalLevel",
+                    lore.add(Jobs.getLanguage().getMessage(player, "command.shop.info.reqTotalLevel",
                         "%totalLevel%", (jPlayer.getTotalLevels() < item.getRequiredTotalLevels()
-                            ? Jobs.getLanguage().getMessage("command.shop.info.reqTotalLevelColor") : "") + item.getRequiredTotalLevels()));
+                            ? Jobs.getLanguage().getMessage(player, "command.shop.info.reqTotalLevelColor") : "") + item.getRequiredTotalLevels()));
                 }
             }
 
@@ -205,7 +206,7 @@ public class ShopManager {
                 public void click(GUIClickType type) {
                     for (String onePerm : item.getRequiredPerm()) {
                         if (!player.hasPermission(onePerm)) {
-                            player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.NoPermForItem"));
+                            Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoPermForItem"));
                             return;
                         }
                     }
@@ -217,7 +218,7 @@ public class ShopManager {
 
                         JobProgression playerJob = jPlayer.getJobProgression(tempJob);
                         if (playerJob == null || playerJob.getLevel() < oneJob.getValue()) {
-                            player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.NoJobReqForitem",
+                            Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoJobReqForitem",
                                 tempJob,
                                 "%joblevel%", oneJob.getValue()));
                             return;
@@ -225,23 +226,23 @@ public class ShopManager {
                     }
 
                     if (item.getPointPrice() > 0 && (jPlayer.getPointsData().getCurrentPoints() <= 0 || jPlayer.getPointsData().getCurrentPoints() < item.getPointPrice())) {
-                        player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.NoPoints"));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoPoints"));
                         return;
                     }
 
                     if (item.getVaultPrice() > 0 && (jPlayer.getBalance() <= 0 || jPlayer.getBalance() < item.getVaultPrice())) {
-                        player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.NoMoney"));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoMoney"));
                         return;
                     }
 
                     int totalLevels = jPlayer.getTotalLevels();
                     if (item.getRequiredTotalLevels() != -1 && totalLevels < item.getRequiredTotalLevels()) {
-                        player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.NoTotalLevel", "%totalLevel%", totalLevels));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.NoTotalLevel", "%totalLevel%", totalLevels));
                         return;
                     }
 
                     if (player.getInventory().firstEmpty() == -1) {
-                        player.sendMessage(Jobs.getLanguage().getMessage("message.crafting.fullinventory"));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "message.crafting.fullinventory"));
                         return;
                     }
 
@@ -271,12 +272,12 @@ public class ShopManager {
                     if (item.getPointPrice() > 0) {
                         jPlayer.getPointsData().takePoints(item.getPointPrice());
                         Jobs.getJobsDAO().savePoints(jPlayer);
-                        player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.Paid", "%amount%", item.getPointPrice()));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.Paid", "%amount%", item.getPointPrice()));
                     }
 
                     if (item.getVaultPrice() > 0) {
                         jPlayer.withdraw(item.getVaultPrice());
-                        player.sendMessage(Jobs.getLanguage().getMessage("command.shop.info.Paid", "%amount%", Jobs.getEconomy().getEconomy().format(item.getVaultPrice())));
+                        Language.deliver(player, Jobs.getLanguage().getMessage(player, "command.shop.info.Paid", "%amount%", Jobs.getEconomy().getEconomy().format(item.getVaultPrice())));
                     }
 
                     openShopGui(player, page);

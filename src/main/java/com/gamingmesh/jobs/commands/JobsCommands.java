@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.commands.list.info;
 import com.gamingmesh.jobs.commands.list.playerinfo;
-import com.gamingmesh.jobs.config.JLC;
 import com.gamingmesh.jobs.container.ActionType;
 import com.gamingmesh.jobs.container.Boost;
 import com.gamingmesh.jobs.container.CurrencyType;
@@ -34,6 +33,7 @@ import net.Zrips.CMILib.Container.PageInfo;
 import net.Zrips.CMILib.Locale.LC;
 import net.Zrips.CMILib.Messages.CMIMessages;
 import net.Zrips.CMILib.RawMessages.RawMessage;
+import com.gamingmesh.jobs.i18n.MessageUtil;
 
 public class JobsCommands implements CommandExecutor {
 
@@ -58,7 +58,7 @@ public class JobsCommands implements CommandExecutor {
 
         if (sender instanceof Player && !Jobs.getGCManager().canPerformActionInWorld(((Player) sender).getWorld())
             && !sender.hasPermission("jobs.disabledworld.commands")) {
-            JLC.general_error_worldisdisabled.sendMessage(sender);
+            Language.deliver(sender, Jobs.getLanguage().getMessage("general.error.worldisdisabled"));
             return true;
         }
 
@@ -144,7 +144,7 @@ public class JobsCommands implements CommandExecutor {
         String message = Jobs.getLanguage().getMessage("command.help.output.cmdUsage");
         message = message.replace("[command]", getUsage(cmd));
         sender.sendMessage(message);
-        sender.sendMessage(Jobs.getLanguage().getMessage("command.help.output.helpPageDescription", "[description]", Jobs.getLanguage().getMessage("command." + cmd + ".help.info")));
+        Language.deliver(sender, Jobs.getLanguage().getMessage("command.help.output.helpPageDescription", "[description]", Jobs.getLanguage().getMessage("command." + cmd + ".help.info")));
     }
 
     protected boolean help(CommandSender sender, int page) {
@@ -155,13 +155,15 @@ public class JobsCommands implements CommandExecutor {
         }
 
         if (page < 1) {
-            CMIActionBar.send(sender, JLC.general_error_noHelpPage.getMessage());
+            if (sender instanceof Player)
+                MessageUtil.sendActionBar((Player) sender, Jobs.getLanguage().getMessage("general.error.noHelpPage"));
             return true;
         }
 
         PageInfo pi = new PageInfo(10, commands.size(), page);
         if (page > pi.getTotalPages()) {
-            CMIActionBar.send(sender, JLC.general_error_noHelpPage.getMessage());
+            if (sender instanceof Player)
+                MessageUtil.sendActionBar((Player) sender, Jobs.getLanguage().getMessage("general.error.noHelpPage"));
             return true;
         }
 
@@ -256,7 +258,7 @@ public class JobsCommands implements CommandExecutor {
             first = false;
 
         }
-        sender.sendMessage(Jobs.getLanguage().getMessage("command.info.help.actions", "%actions%", builder.toString()));
+        Language.deliver(sender, Jobs.getLanguage().getMessage("command.info.help.actions", "%actions%", builder.toString()));
     }
 
     /**
@@ -269,7 +271,7 @@ public class JobsCommands implements CommandExecutor {
     public void jobInfoMessage(CommandSender sender, JobsPlayer player, Job job, String type, int page) {
         if (job == null) {
             // job doesn't exist
-            JLC.general_error_job.sendMessage(sender);
+            Language.sendMessage(sender, "general.error.job");
             return;
         }
 
@@ -321,7 +323,7 @@ public class JobsCommands implements CommandExecutor {
         PageInfo pi = new PageInfo(15, message.size(), page);
 
         if (page > pi.getTotalPages()) {
-            JLC.general_info_invalidPage.sendMessage(sender);
+            Language.sendMessage(sender, "general.info.invalidPage");
             return;
         }
 
@@ -450,6 +452,7 @@ public class JobsCommands implements CommandExecutor {
             "%jobxp%", CurrencyType.EXP.format(jobProg.getExperience()),
             "%jobmaxxp%", jobProg.getMaxExperience(),
             "%titlename%", title == null ? "Unknown" : title.getName());
+        message = stripStatsPrefix(message);
         return " " + (isMaxLevelReached ? "" : progressBar ? jobProgressMessage(jobProg.getMaxExperience(), jobProg.getExperience()) : "") + " " + message;
     }
 
@@ -468,8 +471,8 @@ public class JobsCommands implements CommandExecutor {
         if (bars <= 0)
             return "";
 
-        String full = Jobs.getLanguage().getMessage("command.stats.barFull");
-        String empty = Jobs.getLanguage().getMessage("command.stats.barEmpty");
+        String full = normalizeBarSegment(Jobs.getLanguage().getMessage("command.stats.barFull"), "&2▏");
+        String empty = normalizeBarSegment(Jobs.getLanguage().getMessage("command.stats.barEmpty"), "&7▏");
 
         StringBuilder message = new StringBuilder();
         int percentage = (int) ((current * bars) / max);
@@ -485,6 +488,20 @@ public class JobsCommands implements CommandExecutor {
         }
 
         return message.toString();
+    }
+
+    private String normalizeBarSegment(String value, String fallback) {
+        if (value == null || value.isEmpty()) {
+            return CMIChatColor.translate(fallback);
+        }
+        String trimmed = value.trim();
+        if (trimmed.startsWith("<lang:") && trimmed.endsWith(">")) {
+            return CMIChatColor.translate(fallback);
+        }
+        if (trimmed.contains(".") && !trimmed.contains(" ") && trimmed.toLowerCase().contains("jobs.locale.")) {
+            return CMIChatColor.translate(fallback);
+        }
+        return value;
     }
 
     /**
@@ -503,6 +520,15 @@ public class JobsCommands implements CommandExecutor {
             jobProg.getJob(),
             "%jobxp%", Math.round(exp * 100.0) / 100.0,
             "%jobmaxxp%", maxExperience);
+        message = stripStatsPrefix(message);
         return " " + jobProgressMessage(maxExperience, exp) + " " + message;
+    }
+
+    private String stripStatsPrefix(String value) {
+        if (value == null || value.isEmpty()) {
+            return value;
+        }
+        String prefix = "<b><white>QSMP</white></b> <dark_gray>»</dark_gray>";
+        return value.replace(prefix + " ", "").replace(prefix, "");
     }
 }
