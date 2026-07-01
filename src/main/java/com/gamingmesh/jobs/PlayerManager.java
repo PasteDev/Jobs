@@ -67,7 +67,6 @@ import com.gamingmesh.jobs.stuff.ToggleBarHandling;
 import com.gamingmesh.jobs.stuff.Util;
 
 import com.gamingmesh.jobs.i18n.MessageUtil;
-import com.gamingmesh.jobs.i18n.MessageUtil;
 import net.Zrips.CMILib.Container.CMINumber;
 import net.Zrips.CMILib.Items.CMIItemStack;
 import net.Zrips.CMILib.Items.CMIMaterial;
