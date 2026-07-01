@@ -67,7 +67,6 @@ import com.gamingmesh.jobs.stuff.ToggleBarHandling;
 import com.gamingmesh.jobs.stuff.Util;
 
 import com.gamingmesh.jobs.i18n.MessageUtil;
-import com.gamingmesh.jobs.i18n.MessageUtil;
 import net.Zrips.CMILib.Container.CMINumber;
 import net.Zrips.CMILib.Items.CMIItemStack;
 import net.Zrips.CMILib.Items.CMIMaterial;
@@ -313,7 +312,10 @@ public class PlayerManager {
             return;
 
         jPlayer.onDisconnect();
-        if (Jobs.getGCManager().saveOnDisconnect() || Jobs.getGCManager().MultiServerCompatability()) {
+        if (Jobs.getGCManager().MultiServerCompatability()) {
+            jPlayer.setSaved(false);
+            jPlayer.save(false);
+        } else if (Jobs.getGCManager().saveOnDisconnect()) {
             jPlayer.setSaved(false);
             jPlayer.save(true);
         }
@@ -360,8 +362,11 @@ public class PlayerManager {
             }
         }
 
-        for (JobsPlayer jPlayer : targets.values())
+        for (JobsPlayer jPlayer : targets.values()) {
+            if (Jobs.getGCManager().MultiServerCompatability() && !jPlayer.isOnline())
+                continue;
             jPlayer.save(false, force);
+        }
 
         playersUUID.values().removeIf(jPlayer -> jPlayer.isSaved() && !jPlayer.isOnline());
 

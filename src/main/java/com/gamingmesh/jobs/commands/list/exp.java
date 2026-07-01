@@ -118,7 +118,7 @@ public class exp implements Cmd {
             }
 
             jPlayer.setSaved(false);
-            jPlayer.save(true);
+            jPlayer.save(!Jobs.getGCManager().MultiServerCompatability());
 
             Player player = jPlayer.getPlayer();
             if (player == null) {
