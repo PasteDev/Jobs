@@ -315,7 +315,10 @@ public class PlayerManager {
             return;
 
         jPlayer.onDisconnect();
-        if (Jobs.getGCManager().saveOnDisconnect() || Jobs.getGCManager().MultiServerCompatability()) {
+        if (Jobs.getGCManager().MultiServerCompatability()) {
+            jPlayer.setSaved(false);
+            jPlayer.save(false);
+        } else if (Jobs.getGCManager().saveOnDisconnect()) {
             jPlayer.setSaved(false);
             jPlayer.save(true);
         }
@@ -343,8 +346,11 @@ public class PlayerManager {
          * list. 3) Garbage collect the real list to remove any offline players with
          * saved data
          */
-        for (JobsPlayer jPlayer : new ArrayList<>(playersUUID.values()))
+        for (JobsPlayer jPlayer : new ArrayList<>(playersUUID.values())) {
+            if (Jobs.getGCManager().MultiServerCompatability() && !jPlayer.isOnline())
+                continue;
             jPlayer.save();
+        }
 
         playersUUID.values().removeIf(jPlayer -> jPlayer.isSaved() && !jPlayer.isOnline());
 

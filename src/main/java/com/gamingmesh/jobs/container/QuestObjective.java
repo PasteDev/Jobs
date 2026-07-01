@@ -36,7 +36,7 @@ public class QuestObjective {
 
         try {
 
-            String mats = split[1].toUpperCase();
+            String mats = split[1].trim().toUpperCase();
             String[] co = mats.split(",");
 
             int amount = 1;
